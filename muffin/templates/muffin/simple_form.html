@@ -1,0 +1,12 @@
+
+{% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'muffin/style.css' %}">
+</head>
+{% include 'muffin/header.html' %}
+<h2>{{ form.title }}</h2>
+<form method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<button type="submit">Submit</button>
+</form>

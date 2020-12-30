@@ -1,0 +1,36 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'muffin/style.css' %}">
+</head>
+{% include 'muffin/header.html' %}
+
+<form method="POST">
+    {% csrf_token %}
+    {% if feeds %}
+    <table class="maintable" rules="rows">
+    {% for feed in feeds %}
+        <tr>
+            <td>
+                <input
+                    type="checkbox"
+                    name="url-{{feed.url}}"
+                {% if feed.url in existing_urls %}
+                    checked
+                    disabled
+                />
+                EXISTS
+                {% else %}
+                />
+                {% endif %}
+            </td>
+            <td>
+                {% include 'muffin/feed_data.html' %}
+            </td>
+        </td>
+    {% endfor %}
+    </table>
+    <button type="submit">Add feeds</button>
+    {% else %}
+    No feeds found
+    {% endif %}
+</form>

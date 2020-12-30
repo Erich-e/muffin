@@ -1,0 +1,74 @@
+{% load extra_tags %}
+{% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'muffin/style.css' %}">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <script>
+        const csrftoken = Cookies.get('csrftoken');
+        $(document).ready(() => {
+            $(".toggle").click((event) => {
+                var slide = $(event.target).closest("tr").next("tr.hiddenRow");
+                var articleId = slide.attr("articleid");
+                if (!slide.data("loaded")) {
+                    slide.load(
+                        `api/articles/${articleId}/content`,
+                        () => {
+                            slide.data("loaded", true);
+                            {% if user.is_authenticated %}
+                            markRead(articleId);
+                            {% endif %}
+                        }
+                    );
+                }
+                slide.toggle();
+            });
+            {% if request.user.is_authenticated %}
+            $(".headline").click((event) => {
+                markRead($(event.target).attr("articleid"));
+            });
+            {% endif %}
+        });
+        function markRead(articleId) {
+            $.ajax({
+                url: '{% url 'muffin:mark_read' %}',
+                beforeSend: (request) => {
+                    request.setRequestHeader("X-CSRFTOKEN", csrftoken);
+                },
+                method: 'POST',
+                mode: 'same-origin',
+                data: {"article": articleId}
+            });
+        }
+    </script>
+</head>
+<body>
+{% include 'muffin/header.html' %}
+<table class="maintable" rules="rows">
+    {% for article in page_obj.object_list %}
+    <tr>
+        <td width="100px" align="left">
+            <div class="unimportant">
+                {{article.feed.title}}
+            </div>
+        </td>
+        <td>
+            <a href="{{article.url}}" class="headline" target="_blank" rel="noreferrer noopener" articleid="{{article.id}}">
+                {{article.title}}
+            </a>
+        </td>
+        <td width="50px">
+            {% time_to_read article user %} min
+        </td>
+        <td width="200px">
+            <div class="unimportant">
+                {{article.published_date}}
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% include 'muffin/pagination.html' %}
+</body>
+

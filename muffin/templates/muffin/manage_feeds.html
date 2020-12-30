@@ -1,0 +1,66 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'muffin/style.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <script>
+        $(document).ready(() => {
+            const csrftoken = Cookies.get('csrftoken');
+            $('input[type="checkbox"]').click((event) => {
+                console.log("got here");
+                var box = $(event.target);
+                var url = box.is(":checked") ? "{% url 'muffin:follow' %}" : "{% url 'muffin:unfollow' %}";
+                $.ajax({
+                    url: url,
+                    beforeSend: (request) => {
+                        request.setRequestHeader("X-CSRFTOKEN", csrftoken);
+                    },
+                    method: 'POST',
+                    mode: 'same-origin',
+                    data: {"feed": box.attr("feedid")}
+                });
+            });
+        });
+    </script>
+</head>
+{% include 'muffin/header.html' %}
+
+<div class="actions">
+    <div>
+        <form method="GET" action="{% url 'muffin:add_feed' %}">
+            {% csrf_token %}
+            Add Feed
+            <input name="url"/>
+            <button type="submit">Add</button>
+        </form>
+    </div>
+    <div>
+        <form method="GET" action="{% url 'muffin:find_feeds' %}">
+            {% csrf_token %}
+            Find Feeds
+            <input name="url"/>
+            <button type="submit">Find</button>
+        </form>
+    </div>
+</div>
+<div class="actions">
+    <div>
+        <form method="GET">
+            <input type="search" name="search" {% if search_string %} value={{search_string}} {% endif %}/>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</div>
+
+
+<table class="maintable" rules="rows">
+    {% for feed in feeds %}
+    <tr>
+        <td><input type="checkbox" feedid="{{feed.id}}" {% if user in feed.followers.all %}checked{% endif %}></td>
+        <td>{{feed.title}}</td>
+        <td>{{feed.description}}</td>
+        <td><a href="{{feed.url}}">{{feed.url}}</a></td>
+    <tr>
+    {% endfor %}
+</table>
+

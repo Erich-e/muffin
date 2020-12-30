@@ -1,0 +1,18 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'muffin/style.css' %}">
+</head>
+{% include 'muffin/header.html' %}
+
+{% if feed %}
+{% include 'muffin/feed_data.html' %}
+<form method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="url" value="{{feed.url}}"/>
+    <button type="submit">Confirm</button>
+</form>
+{% else %}
+No rss found
+{% endif %}
+
+
