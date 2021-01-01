@@ -97,6 +97,8 @@ def login_view(request) -> HttpResponse:
             if user is not None:
                 login(request, user)
                 return redirect("muffin:index")
+            else:
+                form.add_error(None, ValidationError("Failed to Authenticate"))
     return render(request, "muffin/simple_form.html", {"form": form})
 
 
@@ -131,7 +133,6 @@ class SignupForm(forms.ModelForm):
         return p2
 
     def save(self, commit=True):
-        breakpoint()
         user = super().save(commit=False)
         user.username = user.email
         user.set_password(self.cleaned_data["password1"])

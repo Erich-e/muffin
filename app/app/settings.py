@@ -33,7 +33,6 @@ STATIC_ROOT = BASE_DIR / "static"
 # Application definition
 
 INSTALLED_APPS = [
-    "polls.apps.PollsConfig",
     "muffin.apps.MuffinConfig",
     "django.contrib.admin",
     "django.contrib.auth",
