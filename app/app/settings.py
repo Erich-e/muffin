@@ -26,8 +26,6 @@ SECRET_KEY = "_zg_^_*7hx^*^e&*07*t(af-1+cw=o)r=zi&ir&!dv1c0p^pz1"
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"
 
 
 # Application definition
