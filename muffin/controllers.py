@@ -7,12 +7,13 @@ from typing import Optional
 
 import feedfinder2
 import feedparser
+from django.forms.models import model_to_dict
 from django.utils import timezone
 from newspaper import Article as ScrapedArticle
 from newspaper.configuration import Configuration as ScraperConfigBase
 
 from .constants import AVERAGE_WPM
-from .models import Article, Feed, User
+from .models import Article, Feed, ReadEvent, User
 
 
 def struct_time_to_datetime(struct_time: time.struct_time):
@@ -114,3 +115,36 @@ class ArticleBuilder:
             title=scraped_article.title,
             num_words=len(scraped_article.text.split()),
         )
+
+
+class UserdataFormatter:
+    def __init__(self, user: User):
+        self.user = user
+
+    def as_dict(self) -> dict:
+        return {
+            "user": model_to_dict(
+                self.user,
+                fields=[
+                    "last_login",
+                    "is_superuser",
+                    "username",
+                    "email",
+                    "is_active",
+                    "date_joined",
+                    "wpm",
+                ],
+            ),
+            "followed_feeds": [
+                model_to_dict(feed) for feed in self.user.followed_feeds.all()
+            ],
+            "read_events": [
+                {
+                    "read_at": read_event.read_at.isoformat(),
+                    "article": model_to_dict(read_event.article),
+                }
+                for read_event in self.user.readevent_set.select_related(
+                    "article"
+                ).all()
+            ],
+        }

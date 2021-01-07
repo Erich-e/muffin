@@ -1,0 +1,26 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'muffin/style.css' %}">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <script>
+        const csrftoken = Cookies.get('csrftoken');
+        var start;
+
+    </script>
+</head>
+<body>
+{% include 'muffin/header.html' %}
+<p>
+    After pressing start, a paragraph will appear.
+    Read the entire passage and press "stop" once finished.
+    You will be timed, but don't try to read faster than your regular speed, which would bias your wpm.
+    <button>Start</button>
+    <p id="timed-text">
+    </p>
+    <button id="finish-button">Finish</button>
+    <p id="result-text">
+    </p>
+    <button id="try-again-button">Try again?</button>
+</body>

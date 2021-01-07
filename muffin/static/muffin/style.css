@@ -117,3 +117,26 @@ header {
     justify-content: space-between;
     align-items: center;
 }
+.header-options {
+    display: flex;
+    align-items: center;
+}
+.dropdown {
+    position: relative;
+    padding: 2px;
+    border: 2px solid black;
+    direction: rtl;
+}
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fefefe;
+}
+.dropdown-content a {
+    display: block;
+    padding: 2px;
+    border: 2px solid black;
+}

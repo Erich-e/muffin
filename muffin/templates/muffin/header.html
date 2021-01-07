@@ -6,15 +6,26 @@
             </a>
         </h1>
     </div>
-    <div>
+    <div class="header-options">
         {% if user.is_authenticated %}
         <a href="{% url 'muffin:manage_feeds' %}">
             Manage Feeds
         </a>
         &nbsp;
-        <a href="{% url 'muffin:logout' %}">
-            Logout
-        </a>
+        <div class="dropdown">
+            {{user.email}}
+            <div class="dropdown-content">
+                <a href="{% url 'muffin:delete_account' %}">
+                    Delete Account
+                </a>
+                <a href="{% url 'muffin:download_data' %}" download="muffin-userdata.json">
+                    Download Data
+                </a>
+                <a href="{% url 'muffin:logout' %}">
+                    Logout
+                </a>
+            </div>
+        </div>
         {% else %}
         <a href="{% url 'muffin:login' %}">
             Login

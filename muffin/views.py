@@ -8,14 +8,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, UsernameField
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import (require_GET, require_http_methods,
                                           require_POST)
 
 from .constants import PAGE_SIZE
-from .controllers import construct_feeds_for_website, construct_new_articles
+from .controllers import (UserdataFormatter, construct_feeds_for_website,
+                          construct_new_articles)
 from .models import Article, Feed, ReadEvent
 
 
@@ -107,6 +108,44 @@ def logout_view(request) -> HttpResponse:
     return redirect("muffin:index")
 
 
+@login_required
+@require_http_methods(["GET", "POST"])
+def download_data(request) -> HttpResponse:
+    formatter = UserdataFormatter(request.user)
+    return JsonResponse(formatter.as_dict())
+
+
+class ConfirmationForm(forms.Form):
+    title = "Are you sure?"
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def delete_account(request) -> HttpResponse:
+    if request.method == "GET":
+        form = ConfirmationForm()
+        return render(request, "muffin/simple_form.html", {"form": form})
+    else:
+        request.user.delete()
+        logout(request)
+        return redirect("muffin:index")
+
+
+@login_required
+@require_GET
+def reading_speed(request) -> HttpResponse:
+    return render(request, "muffin/reading_speed.html")
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def time_wpm(request) -> HttpResponse:
+    if request.method == "GET":
+        return ""
+    else:
+        return ""
+
+
 class SignupForm(forms.ModelForm):
     title = "Sign Up"
 
@@ -150,13 +189,13 @@ def sign_up_view(request) -> HttpResponse:
         if form.is_valid():
             user = form.save(commit=True)
             login(request, user)
-            return redirect("muffin:index")
+            return redirect("muffin:manage_feeds")
 
     return render(request, "muffin/simple_form.html", {"form": form})
 
 
-@require_GET
 @login_required
+@require_GET
 def manage_feeds(request) -> HttpResponse:
     feed_query = Feed.objects.prefetch_related("followers").order_by("title")
     search_string = request.GET.get("search")
