@@ -1,20 +1,18 @@
-
 body {
     background-color:#ffffff;
     color:#000000;
-    font: 13px Arial, Tahoma, Helvetica, sans-serif;
+    font: 16px Arial, Tahoma, Helvetica, sans-serif;
 }
 div.unimportant {
         color:#808080;
 }
 h1 {
-    #text-decoration:underline;
-    font: 28px Arial, Tahoma, Helvetica, sans-serif;
+    text-decoration:underline;
+    font: 30px Arial, Tahoma, Helvetica, sans-serif;
     color: #202000;
 }
 h2 {
-    #text-decoration:underline;
-    font: 22px Arial, Tahoma, Helvetica, sans-serif;
+    font: 20px Arial, Tahoma, Helvetica, sans-serif;
     color: #202020;
 }
 table.maintable {
