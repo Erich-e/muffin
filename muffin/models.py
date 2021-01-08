@@ -45,9 +45,9 @@ class Feed(models.Model):
 
 class Article(models.Model):
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE)
-    source_id = models.CharField(max_length=64)
+    source_id = models.CharField(max_length=64, null=True)
     published_date = models.DateTimeField(db_index=True)
-    url = models.URLField(max_length=200)
+    url = models.URLField(max_length=200, db_index=True)
     image_url = models.URLField(max_length=200)
     title = models.CharField(max_length=64)
     num_words = models.IntegerField(null=True)

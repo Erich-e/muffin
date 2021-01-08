@@ -96,6 +96,21 @@ def format_article_date(article: Article) -> str:
     return article.published_date.strftime(format_str)
 
 
+def calc_rss_published_date(rss_entry: dict, feed: Feed) -> datetime:
+    if "published_parsed" in rss_entry:
+        return struct_time_to_datetime(rss_entry["published_parsed"])
+    else:
+        existing = (
+            Article.objects.filter(url=rss_entry["link"], feed=feed)
+            .order_by("published_date")
+            .first()
+        )
+        if existing is not None:
+            return existing.published_date
+        else:
+            return timezone.now()
+
+
 class TimerMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -121,9 +136,9 @@ class ArticlePuller:
         ]
 
     def is_new_entry(self, rss_entry: dict) -> bool:
-        return "published_parsed" in rss_entry and (
+        return (
             self.cutoff_date is None
-            or struct_time_to_datetime(rss_entry["published_parsed"]) > self.cutoff_date
+            or calc_rss_published_date(rss_entry, self.feed) > self.cutoff_date
         )
 
 
@@ -140,10 +155,10 @@ class ArticleBuilder:
         self.feed = feed
 
     def from_rss(self, rss_entry: dict) -> Article:
-        published_date = struct_time_to_datetime(rss_entry["published_parsed"])
+        published_date = calc_rss_published_date(rss_entry, self.feed)
         rv = Article(
             feed=self.feed,
-            source_id=rss_entry["id"],
+            source_id=rss_entry.get("id", rss_entry.get("guid")),
             published_date=published_date,
             url=rss_entry["link"],
             title=rss_entry["title"],

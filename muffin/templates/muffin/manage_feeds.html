@@ -57,7 +57,12 @@
     {% for feed in feeds %}
     <tr>
         <td><input type="checkbox" feedid="{{feed.id}}" {% if user in feed.followers.all %}checked{% endif %}></td>
-        <td>{{feed.title}}</td>
+        <td>
+            {% if feed.is_bozo %}
+            ⚠️
+            {% endif %}
+            {{feed.title}}
+        </td>
         <td>{{feed.description}}</td>
         <td><a href="{{feed.url}}">{{feed.url}}</a></td>
     <tr>
