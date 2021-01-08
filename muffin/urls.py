@@ -15,6 +15,7 @@ urlpatterns = [
     path("manage_feeds/", views.manage_feeds, name="manage_feeds"),
     path("add_feed/", views.add_feed, name="add_feed"),
     path("find_feeds/", views.find_feeds, name="find_feeds"),
+    path("reading_speed/", views.reading_speed, name="reading_speed"),
     path("api/poll_rss/", views.poll_rss, name="poll_rss"),
     path("api/mark_read/", views.mark_read, name="mark_read"),
     path(
@@ -24,4 +25,5 @@ urlpatterns = [
     ),
     path("api/follow", views.follow, name="follow"),
     path("api/unfollow", views.unfollow, name="unfollow"),
+    path("api/time_wpm", views.time_wpm, name="time_wpm"),
 ]

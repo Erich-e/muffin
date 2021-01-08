@@ -11,12 +11,15 @@ from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.views.decorators.http import (require_GET, require_http_methods,
-                                          require_POST)
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from .constants import PAGE_SIZE
-from .controllers import (UserdataFormatter, construct_feeds_for_website,
-                          construct_new_articles)
+from .controllers import (
+    UserdataFormatter,
+    construct_feeds_for_website,
+    construct_new_articles,
+    get_quote,
+)
 from .models import Article, Feed, ReadEvent
 
 
@@ -141,9 +144,12 @@ def reading_speed(request) -> HttpResponse:
 @require_http_methods(["GET", "POST"])
 def time_wpm(request) -> HttpResponse:
     if request.method == "GET":
-        return ""
+        quote = get_quote()
+        return render(request, "muffin/quote.html", {"quote": quote})
     else:
-        return ""
+        request.user.wpm = int(request.POST["wpm"])
+        request.user.save()
+        return HttpResponse()
 
 
 class SignupForm(forms.ModelForm):

@@ -7,20 +7,66 @@
     <script>
         const csrftoken = Cookies.get('csrftoken');
         var start;
-
+        var in_progress = false;
+        $(document).ready(() => {
+            $("#start-button").click((event) => {
+                if (in_progress) {
+                    return
+                }
+                in_progress = true;
+                $("#result-text").hide();
+                $("#timed-text").load(
+                    '{% url 'muffin:time_wpm' %}',
+                    () => {
+                        $("#start-button").hide();
+                        $("#timed-text").show();
+                        $("#finish-button").show();
+                        start = Date.now();
+                    }
+                );
+            });
+            $("#finish-button").click((event) => {
+                if (!in_progress) {
+                    return
+                }
+                in_progress = false;
+                var num_seconds = Math.max(
+                    Math.round((Date.now() - start) / 1000),
+                    1
+                );
+                var num_words = $("#timed-text").text().split(" ").length;
+                var wpm = Math.round((num_words / num_seconds) * 60);
+                $.ajax({
+                    url: '{% url 'muffin:time_wpm' %}',
+                    beforeSend: (request) => {
+                        request.setRequestHeader("X-CSRFTOKEN", csrftoken);
+                    },
+                    method: 'POST',
+                    mode: 'same-origin',
+                    data: {"wpm": wpm}
+                });
+                $("#finish-button").hide()
+                var result_text = $("#result-text");
+                result_text.text(`Completed in ${num_seconds} seconds -> ${wpm} wpm`);
+                result_text.show();
+                $("#retry-button").show();
+            });
+            $("#retry-button").click((event) => {location.reload();});
+        });
     </script>
 </head>
 <body>
-{% include 'muffin/header.html' %}
-<p>
-    After pressing start, a paragraph will appear.
-    Read the entire passage and press "stop" once finished.
-    You will be timed, but don't try to read faster than your regular speed, which would bias your wpm.
-    <button>Start</button>
-    <p id="timed-text">
+    {% include 'muffin/header.html' %}
+    <p>
+        After pressing start, a paragraph will appear.
+        Read the entire passage and press "stop" once finished.
+        You will be timed, but don't try to read any faster than your regular speed.
     </p>
-    <button id="finish-button">Finish</button>
-    <p id="result-text">
+    <button id="start-button">Start</button>
+    <p id="timed-text" hidden>
     </p>
-    <button id="try-again-button">Try again?</button>
+    <button id="finish-button" hidden>Finish</button>
+    <p id="result-text" hidden>
+    </p>
+    <button id="retry-button" hidden>Retry</button>
 </body>

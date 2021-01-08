@@ -4,7 +4,9 @@ import time
 import urllib
 from datetime import datetime
 from typing import Optional
+import random
 
+import requests
 import feedfinder2
 import feedparser
 from django.forms.models import model_to_dict
@@ -12,7 +14,7 @@ from django.utils import timezone
 from newspaper import Article as ScrapedArticle
 from newspaper.configuration import Configuration as ScraperConfigBase
 
-from .constants import AVERAGE_WPM
+from .constants import AVERAGE_WPM, QUOTE_API_BASE_URL
 from .models import Article, Feed, ReadEvent, User
 
 
@@ -148,3 +150,12 @@ class UserdataFormatter:
                 ).all()
             ],
         }
+
+
+def get_quote(min_length: int = 250) -> dict:
+    resp = requests.get(
+        f"{QUOTE_API_BASE_URL}/quotes", params={"minLength": min_length}
+    )
+    resp.raise_for_status()
+    all_quotes = resp.json()["results"]
+    return random.choice(all_quotes)
