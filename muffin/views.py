@@ -282,3 +282,9 @@ def unfollow(request) -> HttpResponse:
         request.user.followed_feeds.remove(feed)
         request.user.save()
     return HttpResponse()
+
+
+@login_required
+@require_GET
+def stats(request) -> HttpResponse:
+    return render(request, "muffin/stats.html")
