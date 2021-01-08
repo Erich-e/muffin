@@ -3,7 +3,7 @@ import math
 import random
 import time
 import urllib
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 import feedfinder2
@@ -66,6 +66,34 @@ def set_url_scheme(url: str, scheme: str) -> str:
     parsed_url = urllib.parse.urlparse(coerced_url)
     http_url = parsed_url._replace(scheme=scheme)
     return urllib.parse.urlunparse(http_url)
+
+
+def get_quote(min_length: int = 250) -> dict:
+    resp = requests.get(
+        f"{QUOTE_API_BASE_URL}/quotes", params={"minLength": min_length}
+    )
+    resp.raise_for_status()
+    all_quotes = resp.json()["results"]
+    return random.choice(all_quotes)
+
+
+def get_favicon_url(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    query = urllib.parse.urlencode({"domain": parsed.netloc})
+    return FAVICON_API_BASE_URL + "?" + query
+
+
+def format_article_date(article: Article) -> str:
+    now = datetime.now()
+    if now.date() == article.published_date.date():
+        format_str = "Today, %H:%M"
+    elif (now.date() - timedelta(days=1)) == article.published_date.date():
+        format_str = "Yesterday, %H:%M"
+    elif now.year == article.published_date.year:
+        format_str = "%b. %d, %H:%M"
+    else:
+        format_str = "%b. %d, %Y, %H:%M"
+    return article.published_date.strftime(format_str)
 
 
 class TimerMiddleware:
@@ -167,18 +195,3 @@ class UserdataFormatter:
                 ).all()
             ],
         }
-
-
-def get_quote(min_length: int = 250) -> dict:
-    resp = requests.get(
-        f"{QUOTE_API_BASE_URL}/quotes", params={"minLength": min_length}
-    )
-    resp.raise_for_status()
-    all_quotes = resp.json()["results"]
-    return random.choice(all_quotes)
-
-
-def get_favicon_url(url: str) -> str:
-    parsed = urllib.parse.urlparse(url)
-    query = urllib.parse.urlencode({"domain": parsed.netloc})
-    return FAVICON_API_BASE_URL + "?" + query
