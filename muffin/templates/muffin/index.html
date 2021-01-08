@@ -32,15 +32,19 @@
 <table class="maintable" rules="rows">
     {% for article in page_obj.object_list %}
     <tr>
-        <td width="100px" align="left">
-            <div class="unimportant">
-                {{article.feed.title}}
-            </div>
+        <td>
+            <img class="article-thumb" src="{{article.image_url}}"/>
         </td>
         <td>
-            <a href="{{article.url}}" class="headline" target="_blank" rel="noreferrer noopener" articleid="{{article.id}}">
-                {{article.title}}
-            </a>
+            <div class="unimportant">
+                {{article.feed.title}}
+                <img class="feed-icon" src="{{article.feed.favicon_url}}"/>
+            </div>
+            <div class="headline">
+                <a href="{{article.url}}" target="_blank" rel="noreferrer noopener" articleid="{{article.id}}">
+                    {{article.title}}
+                </a>
+            </div>
         </td>
         <td width="50px">
             {% format_time_to_read article user %}

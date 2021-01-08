@@ -15,7 +15,7 @@ from newspaper import Article as ScrapedArticle
 from newspaper import ArticleException as ScrapedArticleException
 from newspaper.configuration import Configuration as ScraperConfigBase
 
-from .constants import AVERAGE_WPM, QUOTE_API_BASE_URL
+from .constants import AVERAGE_WPM, QUOTE_API_BASE_URL, FAVICON_API_BASE_URL
 from .models import Article, Feed, ReadEvent, User
 
 
@@ -118,6 +118,7 @@ class ArticleBuilder:
             source_id=rss_entry["id"],
             published_date=published_date,
             url=rss_entry["link"],
+            title=rss_entry["title"],
         )
         try:
             scraped_article = ScrapedArticle(
@@ -175,3 +176,9 @@ def get_quote(min_length: int = 250) -> dict:
     resp.raise_for_status()
     all_quotes = resp.json()["results"]
     return random.choice(all_quotes)
+
+
+def get_favicon_url(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    query = urllib.parse.urlencode({"domain": parsed.netloc})
+    return FAVICON_API_BASE_URL + "?" + query

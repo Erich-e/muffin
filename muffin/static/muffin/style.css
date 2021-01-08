@@ -19,19 +19,14 @@ table.maintable {
     border: 2px solid black;
     width: 100%;
 }
-img {
-    max-width: 80%;
-    height: auto;
-    display: block;
-}
-a.headline {
+.headline a {
     text-decoration: none;
 }
-a.headline:link {
+.headline a:link {
     color: black;
     font-weight: bold;
 }
-a.headline:visited {
+.headline a:visited {
     color: #808080;
     font-weight: normal;
 }
@@ -71,4 +66,13 @@ header {
     display: block;
     padding: 2px;
     border: 2px solid black;
+}
+img.feed-icon {
+    height: 0.8em;
+    width: auto;
+}
+img.article-thumb {
+    height: 2em;
+    width: 2em;
+    object-fit: cover;
 }
