@@ -50,7 +50,7 @@ def calc_time_to_read(article: Article, user: User) -> int:
 
 
 def format_time_to_read(article: Article, user: User) -> int:
-    if Article.num_words is None:
+    if article.num_words is None:
         return ""
     else:
         time_to_read = calc_time_to_read(article, user)
