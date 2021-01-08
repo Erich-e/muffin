@@ -8,22 +8,6 @@
     <script>
         const csrftoken = Cookies.get('csrftoken');
         $(document).ready(() => {
-            $(".toggle").click((event) => {
-                var slide = $(event.target).closest("tr").next("tr.hiddenRow");
-                var articleId = slide.attr("articleid");
-                if (!slide.data("loaded")) {
-                    slide.load(
-                        `api/articles/${articleId}/content`,
-                        () => {
-                            slide.data("loaded", true);
-                            {% if user.is_authenticated %}
-                            markRead(articleId);
-                            {% endif %}
-                        }
-                    );
-                }
-                slide.toggle();
-            });
             {% if request.user.is_authenticated %}
             $(".headline").click((event) => {
                 markRead($(event.target).attr("articleid"));
