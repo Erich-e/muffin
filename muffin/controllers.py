@@ -1,17 +1,18 @@
 import html
 import math
+import random
 import time
 import urllib
 from datetime import datetime
 from typing import Optional
-import random
 
-import requests
 import feedfinder2
 import feedparser
+import requests
 from django.forms.models import model_to_dict
 from django.utils import timezone
 from newspaper import Article as ScrapedArticle
+from newspaper import ArticleException as ScrapedArticleException
 from newspaper.configuration import Configuration as ScraperConfigBase
 
 from .constants import AVERAGE_WPM, QUOTE_API_BASE_URL
@@ -40,12 +41,20 @@ def construct_feeds_for_website(website_url: str) -> list[Feed]:
     return [Feed.from_url(feed_url) for feed_url in feed_urls]
 
 
-def time_to_read(article: Article, user: User) -> int:
+def calc_time_to_read(article: Article, user: User) -> int:
     if user.is_authenticated:
         wpm = user.wpm
     else:
         wpm = AVERAGE_WPM
     return math.ceil(article.num_words / wpm)
+
+
+def format_time_to_read(article: Article, user: User) -> int:
+    if Article.num_words is None:
+        return ""
+    else:
+        time_to_read = calc_time_to_read(article, user)
+        return f"{time_to_read} min"
 
 
 def set_url_scheme(url: str, scheme: str) -> str:
@@ -103,20 +112,27 @@ class ArticleBuilder:
         self.feed = feed
 
     def from_rss(self, rss_entry: dict) -> Article:
-        scraped_article = ScrapedArticle(rss_entry["link"], config=self.scraper_config)
-        scraped_article.download()
-        scraped_article.parse()
         published_date = struct_time_to_datetime(rss_entry["published_parsed"])
-
-        return Article(
+        rv = Article(
             feed=self.feed,
             source_id=rss_entry["id"],
             published_date=published_date,
             url=rss_entry["link"],
-            image_url=scraped_article.top_image,
-            title=scraped_article.title,
-            num_words=len(scraped_article.text.split()),
         )
+        try:
+            scraped_article = ScrapedArticle(
+                rss_entry["link"], config=self.scraper_config
+            )
+            scraped_article.download()
+            scraped_article.parse()
+        except ScrapedArticleException:
+            ...
+        else:
+            rv.image_url = scraped_article.top_image
+            rv.title = scraped_article.title
+            rv.num_words = len(scraped_article.text.split())
+
+        return rv
 
 
 class UserdataFormatter:

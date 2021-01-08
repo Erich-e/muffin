@@ -48,7 +48,7 @@ class Article(models.Model):
     url = models.URLField(max_length=200)
     image_url = models.URLField(max_length=200)
     title = models.CharField(max_length=64)
-    num_words = models.IntegerField()
+    num_words = models.IntegerField(null=True)
 
 
 class User(AbstractUser):
