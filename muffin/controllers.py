@@ -173,8 +173,8 @@ class ArticleBuilder:
             ...
         else:
             rv.image_url = scraped_article.top_image
-            rv.title = scraped_article.title
-            rv.num_words = len(scraped_article.text.split())
+            if scraped_article.text:
+                rv.num_words = len(scraped_article.text.split())
 
         return rv
 

@@ -33,7 +33,9 @@
     {% for article in page_obj.object_list %}
     <tr>
         <td>
+            {% if article.image_url %}
             <img class="article-thumb" src="{{article.image_url}}"/>
+            {% endif %}
         </td>
         <td>
             <div class="unimportant">
@@ -42,7 +44,11 @@
             </div>
             <div class="headline">
                 <a href="{{article.url}}" target="_blank" rel="noreferrer noopener" articleid="{{article.id}}">
+                    {% if article.title %}
                     {{article.title}}
+                    {% else %}
+                    --Untitled--
+                    {% endif %}
                 </a>
             </div>
         </td>
