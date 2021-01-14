@@ -1,4 +1,5 @@
 import html
+import logging
 import math
 import random
 import time
@@ -25,6 +26,7 @@ def struct_time_to_datetime(struct_time: time.struct_time):
 
 
 def construct_new_articles(feed: Feed) -> list[Article]:
+    logging.info(f"Fetching articles for {feed.title=}")
     new_rss_entries = ArticlePuller(feed).pull_new()
     builder = ArticleBuilder(feed)
     return [builder.from_rss(new_rss_entry) for new_rss_entry in new_rss_entries]
@@ -118,7 +120,7 @@ class TimerMiddleware:
     def __call__(self, request):
         start = time.time()
         response = self.get_response(request)
-        print("Time taken:", time.time() - start)
+        logging.info(f"Time taken: { time.time() - start}")
         return response
 
 
@@ -155,6 +157,7 @@ class ArticleBuilder:
         self.feed = feed
 
     def from_rss(self, rss_entry: dict) -> Article:
+        logging.info(f"Constructing article for {rss_entry['link']=}")
         published_date = calc_rss_published_date(rss_entry, self.feed)
         rv = Article(
             feed=self.feed,
