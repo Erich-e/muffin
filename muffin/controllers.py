@@ -1,14 +1,17 @@
-import html
 import logging
 import math
+import operator
 import random
 import time
 import urllib
 from datetime import datetime, timedelta
 from typing import Optional
+from collections import Counter
 
 import feedfinder2
 import feedparser
+import plotly
+import plotly.express as px
 import requests
 from django.forms.models import model_to_dict
 from django.utils import timezone
@@ -16,7 +19,7 @@ from newspaper import Article as ScrapedArticle
 from newspaper import ArticleException as ScrapedArticleException
 from newspaper.configuration import Configuration as ScraperConfigBase
 
-from .constants import AVERAGE_WPM, QUOTE_API_BASE_URL, FAVICON_API_BASE_URL
+from .constants import AVERAGE_WPM, FAVICON_API_BASE_URL, QUOTE_API_BASE_URL
 from .models import Article, Feed, ReadEvent, User
 
 
@@ -26,7 +29,6 @@ def struct_time_to_datetime(struct_time: time.struct_time):
 
 
 def construct_new_articles(feed: Feed) -> list[Article]:
-    logging.info(f"Fetching articles for {feed.title=}")
     new_rss_entries = ArticlePuller(feed).pull_new()
     builder = ArticleBuilder(feed)
     return [builder.from_rss(new_rss_entry) for new_rss_entry in new_rss_entries]
@@ -157,7 +159,6 @@ class ArticleBuilder:
         self.feed = feed
 
     def from_rss(self, rss_entry: dict) -> Article:
-        logging.info(f"Constructing article for {rss_entry['link']=}")
         published_date = calc_rss_published_date(rss_entry, self.feed)
         rv = Article(
             feed=self.feed,
@@ -213,3 +214,25 @@ class UserdataFormatter:
                 ).all()
             ],
         }
+
+
+def render_usage_plot(activity: list[ReadEvent]) -> plotly.graph_objects.Figure:
+    sort_key = operator.attrgetter("read_at")
+    start = min(activity, key=sort_key).read_at.date()
+    end = timezone.now().date()
+    num_days = (end - start).days + 1
+    x = [start + timedelta(days=i) for i in range(num_days)]
+    y = [0] * num_days
+    for read_event in activity:
+        idx = (read_event.read_at.date() - start).days
+        y[idx] += 1
+    return px.line(
+        x=x, y=y, title="Usage", labels={"x": "", "y": ""}, range_y=[0, max(y)]
+    )
+
+
+def render_favorites_plot(activity: list[ReadEvent]) -> plotly.graph_objects.Figure:
+    cnt = Counter(event.article.feed.title for event in activity)
+    # Unzipping looks so strange
+    names, values = zip(*cnt.items())
+    return px.pie(names=names, values=values, title="Favorites")

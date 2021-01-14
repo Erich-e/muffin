@@ -19,6 +19,8 @@ from .controllers import (
     construct_feeds_for_website,
     construct_new_articles,
     get_quote,
+    render_usage_plot,
+    render_favorites_plot,
 )
 from .models import Article, Feed, ReadEvent
 
@@ -287,4 +289,23 @@ def unfollow(request) -> HttpResponse:
 @login_required
 @require_GET
 def stats(request) -> HttpResponse:
-    return render(request, "muffin/stats.html")
+    """
+    Load everything into memory.
+    Maybe not the most efficient, but def the easiest.
+    """
+    activity = list(
+        ReadEvent.objects.select_related("article", "article__feed")
+        .filter(user=request.user)
+        .all()
+    )
+    usage_plot = render_usage_plot(activity)
+    usage_plot_html = usage_plot.to_html(include_plotlyjs=False, full_html=False)
+    favorites_plot = render_favorites_plot(activity)
+    favorites_plot_html = favorites_plot.to_html(
+        include_plotlyjs=False, full_html=False
+    )
+    return render(
+        request,
+        "muffin/stats.html",
+        {"usage_plot": usage_plot_html, "favorites_plot": favorites_plot_html},
+    )

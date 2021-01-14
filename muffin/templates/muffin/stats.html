@@ -1,6 +1,12 @@
 {% load static %}
 <head>
     <link rel="stylesheet" type="text/css" href="{% static 'muffin/style.css' %}">
+    <script src="https://cdn.plot.ly/plotly-1.58.4.min.js"></script>
 </head>
 {% include 'muffin/header.html' %}
-Coming soon.
+<div class="stats-plot">
+    {{usage_plot|safe}}
+</div>
+<div class="stats-plot">
+    {{favorites_plot|safe}}
+</div>
